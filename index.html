@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EZCAD Generator Manual</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- SheetJS Library untuk generate Excel asli -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f9;
+            color: #1e293b;
+            padding: 24px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+            padding: 32px 36px;
+            margin-top: 10px;
+        }
+        h1 {
+            font-weight: 700;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+        h1 i {
+            color: #2563eb;
+            font-size: 30px;
+        }
+        .subhead {
+            color: #475569;
+            font-size: 14px;
+            background: #f8fafc;
+            padding: 12px 18px;
+            border-radius: 12px;
+            margin-bottom: 28px;
+            border-left: 4px solid #2563eb;
+        }
+        .subhead i {
+            margin-right: 8px;
+            color: #2563eb;
+        }
+        .subhead code {
+            background: #eef2f6;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 18px 24px;
+            background: #f9fbfd;
+            padding: 24px 28px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            border: 1px solid #e9eef3;
+        }
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .field-group label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .field-group label i {
+            color: #2563eb;
+            width: 18px;
+        }
+        .field-group input {
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid #d1d9e6;
+            background: white;
+            font-size: 15px;
+            font-weight: 500;
+            color: #0f172a;
+            transition: 0.15s;
+            outline: none;
+            width: 100%;
+            font-family: 'Inter', monospace;
+        }
+        .field-group input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+        }
+        .field-group .hint {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .field-group .hint code {
+            background: #eef2f6;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #1e293b;
+        }
+        .format-preview {
+            background: #eef2f6;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #1e293b;
+            margin-top: 4px;
+            font-family: monospace;
+            font-weight: 600;
+        }
+        .format-preview span {
+            color: #2563eb;
+        }
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px 16px;
+            margin-bottom: 24px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 15px;
+            border: none;
+            background: #eef2f6;
+            color: #1e293b;
+            cursor: pointer;
+            transition: 0.15s;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 4px 8px -2px rgba(37,99,235,0.25);
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: scale(1.01);
+        }
+        .btn-excel {
+            background: #1e7e34;
+            color: white;
+        }
+        .btn-excel:hover {
+            background: #166b2a;
+        }
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #cbd5e1;
+        }
+        .btn-outline:hover {
+            background: #f1f5f9;
+        }
+        .btn i {
+            font-size: 16px;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 18px;
+            border: 1px solid #e9eef3;
+            background: white;
+            margin-top: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 680px;
+        }
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #1e293b;
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 2px solid #dce3ec;
+            white-space: nowrap;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #edf2f7;
+            color: #0f172a;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover td {
+            background: #fafcff;
+        }
+        .status-badge {
+            background: #d1fae5;
+            color: #0b6e4b;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+            display: inline-block;
+            font-family: 'Inter', sans-serif;
+        }
+        .empty-state {
+            padding: 48px 20px;
+            text-align: center;
+            color: #64748b;
+            font-family: 'Inter', sans-serif;
+        }
+        .empty-state i {
+            font-size: 48px;
+            color: #cbd5e1;
+            margin-bottom: 12px;
+        }
+        .empty-state p {
+            font-size: 16px;
+        }
+        .footer-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            gap: 12px;
+        }
+        .footer-actions .left {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .success-box {
+            background: #d1fae5;
+            border: 1px solid #0b8a4c;
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #0b6e4b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .success-box i {
+            font-size: 20px;
+            color: #0b8a4c;
+        }
+        .excel-icon {
+            color: #1e7e34;
+        }
+        @media (max-width: 900px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 600px) {
+            .container { padding: 20px 16px; }
+            .form-grid { 
+                grid-template-columns: 1fr; 
+                padding: 18px;
+            }
+            .actions { flex-direction: column; align-items: stretch; }
+            .btn { justify-content: center; }
+            .footer-actions { flex-direction: column; align-items: stretch; }
+        }
+        .toast {
+            visibility: hidden;
+            min-width: 220px;
+            background: #1e293b;
+            color: #f8fafc;
+            text-align: center;
+            border-radius: 40px;
+            padding: 10px 24px;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: 0.25s;
+            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .toast i { margin-right: 10px; }
+        .highlight {
+            color: #2563eb;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <h1>
+        <i class="fas fa-cubes"></i> EZCAD Generator
+        <span style="font-size: 14px; font-weight: 400; color: #64748b; margin-left: 8px;">
+            <i class="fas fa-file-excel excel-icon"></i> Excel 97-2003 (.xls)
+        </span>
+    </h1>
+    <div class="subhead">
+        <i class="fas fa-info-circle"></i> 
+        Format Loyalty Number: <strong>Tanggal (YYMMDD)</strong> + <strong>Kode Produk (3 digit)</strong> + <strong>Nomor Urut (4 digit)</strong> <br>
+        Contoh: <code>2608273230001</code> = <span class="highlight">260827</span> + <span class="highlight">323</span> + <span class="highlight">0001</span>
+        <br><span style="color: #0b8a4c;"><i class="fas fa-check-circle"></i> File Excel .xls asli dengan kolom terpisah, siap pakai untuk EZCAD2</span>
+    </div>
+
+    <!-- Form -->
+    <div class="form-grid">
+        <div class="field-group">
+            <label><i class="fas fa-calendar-day"></i> Tanggal (6 digit)</label>
+            <input type="text" id="tanggalInput" placeholder="contoh: 260827" value="260827" maxlength="6" />
+            <span class="hint">Format <code>YYMMDD</code> (6 digit)</span>
+        </div>
+        <div class="field-group">
+            <label><i class="fas fa-tag"></i> Kode Produk (3 digit)</label>
+            <input type="text" id="kodeProduk" placeholder="contoh: 323" value="323" maxlength="3" />
+            <span class="hint">Kode produk, misal <code>323</code></span>
+        </div>
+        <div class="field-group">
+            <label><i class="fas fa-sort-numeric-up"></i> Nomor Urut Mulai</label>
+            <input type="number" id="startNumber" min="0" max="9999" value="1" />
+            <span class="hint">Mulai dari <code>1</code>, <code>500</code>, dll</span>
+        </div>
+        <div class="field-group">
+            <label><i class="fas fa-sort-numeric-up"></i> Jumlah Data</label>
+            <input type="number" id="countInput" min="1" max="9999" value="20" />
+            <span class="hint">Maksimal 9999 baris</span>
+        </div>
+        <div class="field-group">
+            <label><i class="fas fa-box"></i> Nama Item</label>
+            <input type="text" id="itemInput" placeholder="Nama produk" value="WFN 1628 U" />
+            <span class="hint">Nama item sesuai kebutuhan</span>
+        </div>
+        <div class="field-group">
+            <label><i class="fas fa-eye"></i> Preview Format</label>
+            <div class="format-preview" id="formatPreview">
+                260827 + 323 + 0001 = <span>2608273230001</span>
+            </div>
+            <span class="hint">Contoh hasil Loyalty Number</span>
+        </div>
+    </div>
+
+    <!-- Tombol Aksi -->
+    <div class="actions">
+        <button class="btn btn-primary" id="generateBtn"><i class="fas fa-play"></i> Generate Data</button>
+        <button class="btn btn-excel" id="exportBtn"><i class="fas fa-file-excel"></i> Download Excel (.xls)</button>
+        <button class="btn btn-danger" id="clearBtn"><i class="fas fa-trash-alt"></i> Kosongkan</button>
+        <span style="margin-left: auto; font-size: 14px; color: #475569;">
+            <i class="fas fa-database"></i> Total: <strong id="rowCounter">0</strong>
+        </span>
+    </div>
+
+    <!-- Tabel Preview -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>A - Loyalty Number</th>
+                    <th>B - Serial</th>
+                    <th>C - Nama Item</th>
+                    <th>D - Status</th>
+                    <th>E - Kode_1</th>
+                    <th>F - Kode_2</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr>
+                    <td colspan="6" class="empty-state">
+                        <i class="fas fa-table"></i>
+                        <p>Belum ada data. <br> Klik <strong>Generate Data</strong> untuk membuat.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="success-box" id="successBox" style="display: none;">
+        <i class="fas fa-check-circle"></i>
+        <div>
+            <strong>Data siap!</strong> Klik <strong>Download Excel (.xls)</strong> untuk menyimpan file.
+            File ini adalah <strong>Excel 97-2003</strong> asli dengan kolom terpisah.
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-actions">
+        <div class="left">
+            <button class="btn btn-outline" id="sampleBtn" style="background: #f1f5f9;"><i class="fas fa-paste"></i> Contoh 20 Data</button>
+            <button class="btn btn-outline" id="sampleBtn2" style="background: #f1f5f9;"><i class="fas fa-paste"></i> Mulai dari 500</button>
+        </div>
+        <div style="font-size: 13px; color: #64748b;">
+            <i class="fas fa-print"></i> Format: <code>Tanggal + KodeProduk + NomorUrut(4 digit)</code>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Sukses</span></div>
+
+<script>
+    (function() {
+        const tanggalInput = document.getElementById('tanggalInput');
+        const kodeProduk = document.getElementById('kodeProduk');
+        const startNumber = document.getElementById('startNumber');
+        const countInput = document.getElementById('countInput');
+        const itemInput = document.getElementById('itemInput');
+        const formatPreview = document.getElementById('formatPreview');
+        const successBox = document.getElementById('successBox');
+        
+        const generateBtn = document.getElementById('generateBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const sampleBtn = document.getElementById('sampleBtn');
+        const sampleBtn2 = document.getElementById('sampleBtn2');
+        const tableBody = document.getElementById('tableBody');
+        const rowCounter = document.getElementById('rowCounter');
+        const toastEl = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+
+        let currentData = [];
+
+        function showToast(msg, isError = false) {
+            toastMsg.innerText = msg;
+            toastEl.style.background = isError ? '#b91c1c' : '#1e293b';
+            toastEl.classList.add('show');
+            clearTimeout(window.toastTimeout);
+            window.toastTimeout = setTimeout(() => toastEl.classList.remove('show'), 2800);
+        }
+
+        function updatePreview() {
+            const tgl = tanggalInput.value.trim() || '260827';
+            const produk = kodeProduk.value.trim() || '323';
+            const start = parseInt(startNumber.value) || 1;
+            const padded = String(start).padStart(4, '0');
+            const contoh = tgl + produk + padded;
+            formatPreview.innerHTML = `
+                ${tgl} + ${produk} + ${padded} = <span>${contoh}</span>
+            `;
+        }
+
+        [tanggalInput, kodeProduk, startNumber].forEach(el => {
+            el.addEventListener('input', updatePreview);
+            el.addEventListener('change', updatePreview);
+        });
+
+        function generateData(tgl, produk, start, count, item) {
+            if (!tgl || tgl.length !== 6 || !/^\d{6}$/.test(tgl)) {
+                showToast('Tanggal harus 6 digit angka (YYMMDD)', true);
+                return null;
+            }
+            if (!produk || produk.length !== 3 || !/^\d{3}$/.test(produk)) {
+                showToast('Kode produk harus 3 digit angka', true);
+                return null;
+            }
+            const startNum = parseInt(start, 10);
+            if (isNaN(startNum) || startNum < 0 || startNum > 9999) {
+                showToast('Nomor urut harus antara 0 - 9999', true);
+                return null;
+            }
+            const countNum = parseInt(count, 10);
+            if (isNaN(countNum) || countNum < 1 || countNum > 9999) {
+                showToast('Jumlah data harus antara 1 - 9999', true);
+                return null;
+            }
+            if (!item || item.trim() === '') {
+                showToast('Nama item tidak boleh kosong', true);
+                return null;
+            }
+
+            const itemName = item.trim();
+            const data = [];
+            for (let i = 0; i < countNum; i++) {
+                const urut = startNum + i;
+                if (urut > 9999) {
+                    showToast(`Nomor urut melebihi 9999 pada index ke-${i+1}`, true);
+                    break;
+                }
+                const urutPad = String(urut).padStart(4, '0');
+                const loyalty = tgl + produk + urutPad;
+                const serial = String(i + 1).padStart(6, '0');
+                data.push({
+                    loyalty: loyalty,
+                    serial: serial,
+                    item: itemName,
+                    status: 'QC Passed',
+                    kode1: loyalty,
+                    kode2: loyalty
+                });
+            }
+            return data;
+        }
+
+        function renderTable(data) {
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="fas fa-table"></i>
+                            <p>Belum ada data. <br> Klik <strong>Generate Data</strong> untuk membuat.</p>
+                        </td>
+                    </tr>
+                `;
+                rowCounter.textContent = '0';
+                successBox.style.display = 'none';
+                return;
+            }
+            let html = '';
+            data.forEach(row => {
+                html += `<tr>
+                    <td>${row.loyalty}</td>
+                    <td>${row.serial}</td>
+                    <td style="font-family: 'Inter', sans-serif;">${row.item}</td>
+                    <td><span class="status-badge">${row.status}</span></td>
+                    <td>${row.kode1}</td>
+                    <td>${row.kode2}</td>
+                </tr>`;
+            });
+            tableBody.innerHTML = html;
+            rowCounter.textContent = data.length;
+            successBox.style.display = 'flex';
+        }
+
+        function handleGenerate() {
+            const tgl = tanggalInput.value.trim();
+            const produk = kodeProduk.value.trim();
+            const start = startNumber.value.trim();
+            const count = countInput.value.trim();
+            const item = itemInput.value.trim();
+
+            const generated = generateData(tgl, produk, start, count, item);
+            if (generated) {
+                currentData = generated;
+                renderTable(currentData);
+                showToast(`✅ Berhasil generate ${currentData.length} data`);
+            }
+        }
+
+        // Export ke Excel .xls ASLI menggunakan SheetJS
+        function exportExcel() {
+            if (!currentData || currentData.length === 0) {
+                showToast('Tidak ada data untuk diexport', true);
+                return;
+            }
+
+            try {
+                // Buat data array untuk SheetJS
+                const data = [
+                    ['Loyalty Number', 'Serial', 'Nama Item', 'Status', 'Kode_1', 'Kode_2']
+                ];
+
+                currentData.forEach(row => {
+                    data.push([
+                        row.loyalty,
+                        row.serial,
+                        row.item,
+                        row.status,
+                        row.kode1,
+                        row.kode2
+                    ]);
+                });
+
+                // Buat workbook
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(data);
+
+                // Set lebar kolom
+                ws['!cols'] = [
+                    { wch: 20 }, // Loyalty Number
+                    { wch: 12 }, // Serial
+                    { wch: 15 }, // Nama Item
+                    { wch: 12 }, // Status
+                    { wch: 20 }, // Kode_1
+                    { wch: 20 }  // Kode_2
+                ];
+
+                // Tambahkan sheet ke workbook
+                XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+                // Generate file Excel
+                const wbout = XLSX.write(wb, { 
+                    bookType: 'xls', 
+                    type: 'array',
+                    bookSST: false
+                });
+
+                // Buat Blob
+                const blob = new Blob([wbout], { 
+                    type: 'application/vnd.ms-excel' 
+                });
+
+                // Download
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                const now = new Date();
+                const dateStr = now.toISOString().slice(0,10);
+                link.download = `EZCAD_${dateStr}.xls`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+
+                showToast('📥 Excel (.xls) asli berhasil diexport');
+            } catch (e) {
+                showToast('Error: ' + e.message, true);
+                console.error(e);
+            }
+        }
+
+        function clearData() {
+            currentData = [];
+            renderTable([]);
+            showToast('Data dikosongkan');
+        }
+
+        function loadSample() {
+            tanggalInput.value = '260827';
+            kodeProduk.value = '323';
+            startNumber.value = '1';
+            countInput.value = '20';
+            itemInput.value = 'WFN 1628 U';
+            updatePreview();
+            handleGenerate();
+        }
+
+        function loadSampleFrom500() {
+            tanggalInput.value = '260827';
+            kodeProduk.value = '323';
+            startNumber.value = '500';
+            countInput.value = '20';
+            itemInput.value = 'WFN 1628 U';
+            updatePreview();
+            handleGenerate();
+        }
+
+        function init() {
+            updatePreview();
+            tanggalInput.value = '260827';
+            kodeProduk.value = '323';
+            startNumber.value = '1';
+            countInput.value = '20';
+            itemInput.value = 'WFN 1628 U';
+            updatePreview();
+            handleGenerate();
+        }
+
+        generateBtn.addEventListener('click', handleGenerate);
+        exportBtn.addEventListener('click', exportExcel);
+        clearBtn.addEventListener('click', clearData);
+        sampleBtn.addEventListener('click', loadSample);
+        sampleBtn2.addEventListener('click', loadSampleFrom500);
+
+        [tanggalInput, kodeProduk, startNumber, countInput, itemInput].forEach(inp => {
+            inp.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleGenerate();
+                }
+            });
+        });
+
+        init();
+    })();
+</script>
+
+</body>
+</html>
